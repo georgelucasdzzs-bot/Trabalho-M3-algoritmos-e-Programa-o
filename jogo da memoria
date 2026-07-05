@@ -1,0 +1,342 @@
+
+#include <iostream>
+#include <stdlib.h>
+#include <time.h>
+#include <string>
+
+using namespace std;
+
+int main() {
+    srand(time(NULL)); 
+
+    string opcaoMenu = "0"; 
+    char teclaContinuar = ' '; 
+
+    // --- VARIÁVEIS DE ESTATÍSTICA 
+    int totalPartidas = 0;
+    int totalVitorias = 0;
+    int totalDerrotas = 0;
+    int melhorPontuacao = 99; // Inicializado alto para encontrar o menor número de jogadas (recorde)
+    int totalJogadasAcumuladas = 0; 
+
+    while (opcaoMenu != "4") { 
+        
+        for (int i = 0; i < 30; i++) {
+            cout << "\n";
+        }
+
+        cout << "====================================\n";
+        cout << "          JOGO DA MEMORIA\n";
+        cout << "====================================\n";
+        cout << "1. Jogar Nova Partida\n";
+        cout << "2. Estatisticas de Desempenho\n";
+        cout << "3. Sobre\n";
+        cout << "4. Sair\n";
+        cout << "Escolha uma opcao: ";
+        cin >> opcaoMenu;
+
+        if (opcaoMenu == "1") {
+            
+            int matrizPrincipal[4][4] = {
+                {1, 4, 5, 2},
+                {7, 2, 8, 7},
+                {3, 6, 1, 4},
+                {6, 5, 3, 8}
+            };
+
+            int matrizGabarito[4][4];
+            int matrizJogo[4][4]; 
+            int matrizDescobertos[4][4]; 
+
+            int operacao = (rand() % 4) + 1;
+
+            cout << "\nOperacao sorteada: ";
+            switch(operacao) {
+                case 1: cout << "Copia\n"; break;
+                case 2: cout << "Transposta\n"; break;
+                case 3: cout << "Invertida por linha\n"; break;
+                case 4: cout << "Invertida por coluna\n"; break;
+            }
+            
+            teclaContinuar = ' ';
+            while (teclaContinuar != 'c' && teclaContinuar != 'C') {
+                cout << "Digite 'c' e pressione ENTER para iniciar o jogo: ";
+                cin >> teclaContinuar;
+            }
+
+            // Preenchimento das Matrizes
+            for (int i = 0; i < 4; i++) {
+                for (int j = 0; j < 4; j++) {
+                    if (operacao == 1) {
+                        matrizGabarito[i][j] = matrizPrincipal[i][j];
+                    } else if (operacao == 2) {
+                        matrizGabarito[i][j] = matrizPrincipal[j][i];
+                    } else if (operacao == 3) {
+                        matrizGabarito[i][j] = matrizPrincipal[3 - i][j];
+                    } else if (operacao == 4) {
+                        matrizGabarito[i][j] = matrizPrincipal[i][3 - j];
+                    }
+                    matrizJogo[i][j] = 0;
+                    matrizDescobertos[i][j] = 0;
+                }
+            }
+
+            int jogadasRealizadas = 0;
+            int paresEncontrados = 0;
+            int maxJogadas = 24; 
+            
+            // Variáveis de leitura como STRING 
+            string linhaStr1, colunaStr1, linhaStr2, colunaStr2;
+            int l1, c1, l2, c2;
+
+            while (jogadasRealizadas < maxJogadas && paresEncontrados < 8) {
+                
+                for (int i = 0; i < 30; i++) cout << "\n";
+
+                int progresso = (paresEncontrados * 100) / 8;
+
+                cout << "====================================\n";
+                cout << "          PARTIDA EM ANDAMENTO\n";
+                cout << "====================================\n";
+                cout << "Jogadas realizadas: " << jogadasRealizadas << " / " << maxJogadas << "\n";
+                cout << "Jogadas restantes: " << maxJogadas - jogadasRealizadas << "\n";
+                cout << "Pares encontrados: " << paresEncontrados << " / 8\n";
+                cout << "Progresso: " << progresso << "%\n\n";
+
+                cout << "     0  1  2  3 (Colunas)\n";
+                cout << "   -------------\n";
+                for (int i = 0; i < 4; i++) {
+                    cout << i << " |  ";
+                    for (int j = 0; j < 4; j++) {
+                        if (matrizJogo[i][j] == 0) {
+                            cout << "* "; 
+                        } else {
+                            cout << matrizJogo[i][j] << "  "; 
+                        }
+                    }
+                    cout << "\n";
+                }
+                cout << "\n";
+
+                // PRIMEIRA PEÇA
+                cout << "Escolha a PRIMEIRA peca:\n";
+                cout << "Linha (0-3): "; cin >> linhaStr1;
+                cout << "Coluna (0-3): "; cin >> colunaStr1;
+
+                // Validação de texto estrita 
+                if ((linhaStr1 != "0" && linhaStr1 != "1" && linhaStr1 != "2" && linhaStr1 != "3") ||
+                    (colunaStr1 != "0" && colunaStr1 != "1" && colunaStr1 != "2" && colunaStr1 != "3")) {
+                    cout << "Entrada invalida! Digite apenas numeros de 0 a 3.\n";
+               
+                    teclaContinuar = ' ';
+                    while (teclaContinuar != 'c' && teclaContinuar != 'C') {
+                        cout << "Digite 'c' e pressione ENTER para continuar: "; cin >> teclaContinuar;
+                    }
+                    continue;
+                }
+
+                // Converte o caractere da string para número inteiro 
+                l1 = linhaStr1[0] - '0';
+                c1 = colunaStr1[0] - '0';
+
+                if (matrizDescobertos[l1][c1] != 0) {
+                    cout << "Posicao ja revelada! Tente novamente.\n";
+                
+                    teclaContinuar = ' ';
+                    while (teclaContinuar != 'c' && teclaContinuar != 'C') {
+                        cout << "Digite 'c' e pressione ENTER para continuar: "; cin >> teclaContinuar;
+                    }
+                    continue;
+                }
+
+                matrizJogo[l1][c1] = matrizGabarito[l1][c1];
+
+                for (int i = 0; i < 30; i++) cout << "\n";
+
+                cout << "====================================\n";
+                cout << "          PARTIDA EM ANDAMENTO\n";
+                cout << "====================================\n\n";
+                cout << "     0  1  2  3\n";
+                cout << "   -------------\n";
+                for (int i = 0; i < 4; i++) {
+                    cout << i << " |  ";
+                    for (int j = 0; j < 4; j++) {
+                        if (matrizJogo[i][j] == 0) {
+                            cout << "* ";
+                        } else {
+                            cout << matrizJogo[i][j] << "  ";
+                        }
+                    }
+                    cout << "\n";
+                }
+                cout << "\n";
+
+                // SEGUNDA PEÇA
+                cout << "Escolha a SEGUNDA peca:\n";
+                cout << "Linha (0-3): "; cin >> linhaStr2;
+                cout << "Coluna (0-3): "; cin >> colunaStr2;
+
+                // Validação de texto estrita da segunda peça
+                if ((linhaStr2 != "0" && linhaStr2 != "1" && linhaStr2 != "2" && linhaStr2 != "3") ||
+                    (colunaStr2 != "0" && colunaStr2 != "1" && colunaStr2 != "2" && colunaStr2 != "3")) {
+                    cout << "Entrada invalida! Digite apenas numeros de 0 a 3.\n";
+                    matrizJogo[l1][c1] = 0; 
+             
+                    teclaContinuar = ' ';
+                    while (teclaContinuar != 'c' && teclaContinuar != 'C') {
+                        cout << "Digite 'c' e pressione ENTER para continuar: "; cin >> teclaContinuar;
+                    }
+                    continue;
+                }
+
+                l2 = linhaStr2[0] - '0';
+                c2 = colunaStr2[0] - '0';
+
+                if (matrizDescobertos[l2][c2] != 0 || (l1 == l2 && c1 == c2)) {
+                    cout << "Posicao repetida ou ja revelada! Tente novamente.\n";
+                    matrizJogo[l1][c1] = 0; 
+                  
+                    teclaContinuar = ' ';
+                    while (teclaContinuar != 'c' && teclaContinuar != 'C') {
+                        cout << "Digite 'c' e pressione ENTER para continuar: "; cin >> teclaContinuar;
+                    }
+                    continue;
+                }
+
+                matrizJogo[l2][c2] = matrizGabarito[l2][c2];
+
+                for (int i = 0; i < 30; i++) cout << "\n";
+
+                cout << "\nVerificando as pecas escolhidas...\n\n";
+                cout << "     0  1  2  3\n";
+                cout << "   -------------\n";
+                for (int i = 0; i < 4; i++) {
+                    cout << i << " |  ";
+                    for (int j = 0; j < 4; j++) {
+                        if (matrizJogo[i][j] == 0) {
+                            cout << "* ";
+                        } else {
+                            cout << matrizJogo[i][j] << "  ";
+                        }
+                    }
+                    cout << "\n";
+                }
+                cout << "\n";
+
+                if (matrizGabarito[l1][c1] == matrizGabarito[l2][c2]) {
+                    cout << "JOGADA OK (Acertou o par!)\n";
+                    paresEncontrados++;
+                    matrizDescobertos[l1][c1] = 1;
+                    matrizDescobertos[l2][c2] = 1;
+                } else {
+                    cout << "JOGADA NOK (Errou o par!)\n";
+                    matrizJogo[l1][c1] = 0;
+                    matrizJogo[l2][c2] = 0;
+                }
+
+                jogadasRealizadas++;
+
+                teclaContinuar = ' ';
+                while (teclaContinuar != 'c' && teclaContinuar != 'C') {
+                    cout << "Digite 'c' e pressione ENTER para continuar: ";
+                    cin >> teclaContinuar;
+                }
+            }
+
+            // Encerramento da Partida
+            for (int i = 0; i < 30; i++) cout << "\n";
+
+            cout << "====================================\n";
+            cout << "           FIM DE JOGO!\n";
+            cout << "====================================\n";
+            
+            // --- CÁLCULO E ALIMENTAÇÃO DE DADOS ---
+            totalPartidas++;
+            totalJogadasAcumuladas += jogadasRealizadas;
+
+            if (paresEncontrados == 8) {
+                cout << "\nPARABENS! Voce descobriu todos os pares e VENCEU O JOGO!\n";
+                totalVitorias++;
+                if (jogadasRealizadas < melhorPontuacao) {
+                    melhorPontuacao = jogadasRealizadas;
+                    cout << "NOVO RECORDE DE JOGADAS ATINGIDO!\n";
+                }
+            } else {
+                cout << "\nDERROTA! Voce atingiu o limite de jogadas.\n";
+                totalDerrotas++;
+            }
+            cout << "Total de pares encontrados: " << paresEncontrados << " de 8\n";
+            cout << "Total de jogadas realizadas: " << jogadasRealizadas << " de " << maxJogadas << "\n\n";
+
+            cout << "MATRIZ GABARITO\n\n";
+            for (int i = 0; i < 4; i++) {
+                for (int j = 0; j < 4; j++) {
+                    cout << matrizGabarito[i][j] << "  ";
+                }
+                cout << "\n"; 
+            }
+            cout << "\n";
+
+            teclaContinuar = ' ';
+            while (teclaContinuar != 'c' && teclaContinuar != 'C') {
+                cout << "Digite 'c' e pressione ENTER para voltar ao menu: ";
+                cin >> teclaContinuar;
+            }
+
+        } else if (opcaoMenu == "2") {
+            // --- ÁREA DE ESTATÍSTICAS ---
+            for (int i = 0; i < 30; i++) cout << "\n";
+            cout << "====================================\n";
+            cout << "     ESTATISTICAS DE DESEMPENHO     \n";
+            cout << "====================================\n";
+            cout << "Total de partidas jogadas : " << totalPartidas << "\n";
+            cout << "Total de Vitorias         : " << totalVitorias << "\n";
+            cout << "Total de Derrotas         : " << totalDerrotas << "\n";
+            
+            if (totalPartidas > 0) {
+                double aproveitamento = (double)(totalVitorias * 100) / totalPartidas;
+                double mediaJogadas = (double)totalJogadasAcumuladas / totalPartidas;
+
+                cout << "Taxa de Aproveitamento    : " << aproveitamento << "%\n";
+                cout << "Media de jogadas / partida: " << mediaJogadas << "\n";
+                
+                if (melhorPontuacao != 99) {
+                    cout << "Melhor partida (Recorde)  : " << melhorPontuacao << " jogadas\n";
+                } else {
+                    cout << "Melhor partida (Recorde)  : Nenhuma vitoria registrada ainda\n";
+                }
+            } else {
+                cout << "\nNenhuma partida foi jogada nesta sessao ainda.\n";
+            }
+            cout << "====================================\n\n";
+
+            teclaContinuar = ' ';
+            while (teclaContinuar != 'c' && teclaContinuar != 'C') {
+                cout << "Digite 'c' e pressione ENTER para voltar ao menu: ";
+                cin >> teclaContinuar;
+            }
+
+        } else if (opcaoMenu == "3") {
+            for (int i = 0; i < 30; i++) cout << "\n";
+            cout << "====================================\n";
+            cout << "               SOBRE\n";
+            cout << "====================================\n";
+            cout << "Desenvolvido como um Jogo da Memoria\n";
+            cout << "com modificacoes de matrizes.\n\n";
+            cout << "Professor - Alex Rese\n";
+            cout << "Disciplina - Algoritmos e Programacao\n";
+            cout << "Alunos - Carlos Eduardo, George Lucas, Kleyton Fernando e Paulo Henrique\n";
+            cout << "Data de criacao - 29/06/2026\n";
+            cout << "======================================\n\n";
+            
+            teclaContinuar = ' ';
+            while (teclaContinuar != 'c' && teclaContinuar != 'C') {
+                cout << "Digite 'c' e pressione ENTER para voltar ao menu: ";
+                cin >> teclaContinuar;
+            }
+        }
+    }
+
+    cout << "\nObrigado por jogar! Saindo...\n";
+    return 0;
+}
